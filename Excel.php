@@ -531,7 +531,8 @@ class Excel extends \yii\base\Widget
 				} else {
 					$column_value = $this->executeGetColumnData($model, ['attribute' => $column]);
 				}
-				$activeSheet->setCellValue($col.$row,$column_value);
+				//$activeSheet->setCellValue($col.$row,$column_value);
+				$activeSheet->setCellValueExplicit($col.$row,$column_value, \PHPExcel_Cell_DataType::TYPE_STRING);
 				$colnum++;
 			}
 			$row++;
@@ -643,9 +644,12 @@ class Excel extends \yii\base\Widget
 				if (isset($value_log[1]) && $value_log[1] !== null) {
 					$_columns[$key]['format'] = $value_log[1];
 				}
-
+				//宽度
 				if (isset($value_log[2]) && $value_log[2] !== null) {
-					$_columns[$key]['header'] = $value_log[2];
+					$_columns[$key]['width'] = $value_log[2];
+				}
+				if (isset($value_log[3]) && $value_log[3] !== null) {
+					$_columns[$key]['header'] = $value_log[3];
 				}
 			} elseif (is_array($value)) {
 				if (!isset($value['attribute']) && !isset($value['value'])) {

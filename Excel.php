@@ -564,6 +564,25 @@ class Excel extends \yii\base\Widget
 		return $new_data;
 	}
 
+    /**
+     * 映射数据库字段，超出数据库字段，过滤不要
+     * @param $sheetData
+     * @param array $columns
+     * @return array
+     */
+	public function executeArrayLabelColumns($sheetData, $columns = [])
+    {
+        $new_data = [];
+
+        foreach ($sheetData as $values)
+        {
+            $values = array_slice($values, 0, count($columns));
+
+            $new_data[] = array_combine($columns, $values);
+        }
+
+        return $new_data;
+    }
 	/**
 	 * Leave record with same index number.
 	 * @param array $sheetData
@@ -784,19 +803,29 @@ class Excel extends \yii\base\Widget
 					if (!empty($this->leaveRecordByIndex) && isset($this->leaveRecordByIndex[$indexed]) && is_array($this->leaveRecordByIndex[$indexed])) {
 						$sheetDatas[$indexed] = $this->executeLeaveRecords($sheetDatas[$indexed], $this->leaveRecordByIndex[$indexed]);
 					}
+
+                    if (!empty($this->columns) && isset($this->columns[$indexed]) && is_array($this->columns[$indexed])) {
+                        $sheetDatas[$indexed] = $this->executeArrayLabelColumns($sheetDatas[$indexed], $this->columns[$indexed]);
+                    }
 				}
 			}
 		} else {
+
 			$sheetDatas = $objectPhpExcel->getActiveSheet()->toArray(null, true, true, true);
 			if ($this->setFirstRecordAsKeys) {
 				$sheetDatas = $this->executeArrayLabel($sheetDatas);
 			}
+
 			if (!empty($this->getOnlyRecordByIndex)) {
 				$sheetDatas = $this->executeGetOnlyRecords($sheetDatas, $this->getOnlyRecordByIndex);
 			}
+
 			if (!empty($this->leaveRecordByIndex)) {
 				$sheetDatas = $this->executeLeaveRecords($sheetDatas, $this->leaveRecordByIndex);
 			}
+			if (!empty($this->columns)) {
+                $sheetDatas = $this->executeArrayLabelColumns($sheetDatas, $this->columns);
+            }
 		}
 
 		return $sheetDatas;

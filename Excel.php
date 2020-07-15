@@ -132,6 +132,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * 		'setFirstRecordAsKeys' => true, // if you want to set the keys of record column with first record, if it not set, the header with use the alphabet column on excel.
  * 		'setIndexSheetByName' => true, // set this if your excel data with multiple worksheet, the index of array will be set with the sheet name. If this not set, the index will use numeric.
  * 		'getOnlySheet' => 'sheet1', // you can set this property if you want to get the specified sheet from the excel data with multiple worksheet.
+ * 		'columns' => ['column1', 'column2'], //[['column1', 'column2'], ['column1', 'column2']]
  *	]);
  *
  * // import data with multiple file.
@@ -531,8 +532,13 @@ class Excel extends \yii\base\Widget
 				} else {
 					$column_value = $this->executeGetColumnData($model, ['attribute' => $column]);
 				}
-				//$activeSheet->setCellValue($col.$row,$column_value);
-				$activeSheet->setCellValueExplicit($col.$row,$column_value, \PHPExcel_Cell_DataType::TYPE_STRING);
+				//数字过短时候，也不用科学计数法，例如手机号
+                if (isset($column['format']) && $column['format'] == 'text') {
+                    $activeSheet->setCellValueExplicit($col.$row,$column_value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                } else {
+                    $activeSheet->setCellValue($col.$row,$column_value);
+                }
+
 				$colnum++;
 			}
 			$row++;
@@ -789,8 +795,13 @@ class Excel extends \yii\base\Widget
 					if (!empty($this->leaveRecordByIndex)) {
 						$sheetDatas[$indexed] = $this->executeLeaveRecords($sheetDatas[$indexed], $this->leaveRecordByIndex);
 					}
+                    if (!empty($this->columns)) {
+                        $sheetDatas[$indexed] = $this->executeArrayLabelColumns($sheetDatas[$indexed], $this->columns);
+                    }
+
 					return $sheetDatas[$indexed];
 				} else {
+
 					$objectPhpExcel->setActiveSheetIndexByName($sheetName);
 					$indexed = $this->setIndexSheetByName==true ? $sheetName : $sheetIndex;
 					$sheetDatas[$indexed] = $objectPhpExcel->getActiveSheet()->toArray(null, true, true, true);
@@ -804,8 +815,13 @@ class Excel extends \yii\base\Widget
 						$sheetDatas[$indexed] = $this->executeLeaveRecords($sheetDatas[$indexed], $this->leaveRecordByIndex[$indexed]);
 					}
 
-                    if (!empty($this->columns) && isset($this->columns[$indexed]) && is_array($this->columns[$indexed])) {
-                        $sheetDatas[$indexed] = $this->executeArrayLabelColumns($sheetDatas[$indexed], $this->columns[$indexed]);
+                    if (!empty($this->columns)) {
+                        if (isset($this->columns[$indexed]) && is_array($this->columns[$indexed])) {
+                            $sheetDatas[$indexed] = $this->executeArrayLabelColumns($sheetDatas[$indexed], $this->columns[$indexed]);
+                        } else {
+                            $sheetDatas[$indexed] = $this->executeArrayLabelColumns($sheetDatas[$indexed], $this->columns);
+                        }
+
                     }
 				}
 			}

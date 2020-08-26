@@ -2,6 +2,7 @@
 
 namespace moonland\phpexcel;
 
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidConfigException;
 use yii\base\InvalidParamException;
@@ -534,7 +535,7 @@ class Excel extends \yii\base\Widget
 				}
 				//数字过短时候，也不用科学计数法，例如手机号
                 if (isset($column['format']) && $column['format'] == 'text') {
-                    $activeSheet->setCellValueExplicit($col.$row,$column_value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                    $activeSheet->setCellValueExplicit($col.$row,$column_value, DataType::TYPE_STRING);
                 } else {
                     $activeSheet->setCellValue($col.$row,$column_value);
                 }

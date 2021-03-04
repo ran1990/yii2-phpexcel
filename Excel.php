@@ -886,6 +886,11 @@ class Excel extends \yii\base\Widget
         	    	if ($this->asAttachment) {
         	    		$this->setHeaders();
         	    	}
+            #导出多个sheet，出现bug，__construct构造时候多一列
+            if ($this->isMultipleSheet) {
+                $sheet->removeSheetByIndex($sheet->getSheetCount() - 1);
+                $sheet->setActiveSheetIndex(0);
+            }
 	       	$this->writeFile($sheet);
 	       	$sheet->disconnectWorksheets();
 	       	unset($sheet);
